@@ -1,3 +1,23 @@
+# HCMUT TMT – Blast Radius entry
+
+**Approach.** `selector.py` decides, per patch, which tests can possibly be affected, using only
+the pinned sqlglot commit (`eb11aec`):
+
+- `map/map.pkl.xz` – per-test map built from the pinned commit (no patches involved):
+  lines each test executed (each test in its own forked process, spawn-pool workers included),
+  files each test opened, modules each test loaded. Rebuild with `tools/map_build/run_map.sh`.
+- `blast/candidates.py` – applies the patch to the pinned source, compares ASTs (comment-only or
+  formatting-only edits change nothing), and maps each changed statement to the tests that executed it.
+  Module/class-level edits select the tests that loaded the module and read the changed names.
+  Fixture/data files select the tests that opened them. Syntax errors, unknown files or any
+  error fall back to running every test.
+- `blast/lpt.py` – longest-processing-time split, choosing the worker count (1–8) with the
+  lowest `max load + 2 s × workers`.
+
+There is no table from patches or kinds of edits to tests.
+
+---
+
 # Blast Radius starter
 
 A working submission for the Blast Radius track. It runs every test on every commit, so it never misses a failure and scores badly. Your job is to run less without missing.
