@@ -16,6 +16,10 @@ the pinned sqlglot commit (`eb11aec`):
 - `blast/runner.py` – when a change runs at import time, the patched module is imported from a
   symlink overlay of the pinned checkout under `/tmp`; if the import fails, every test that
   loaded that module is selected.
+- `Dockerfile.v3` (optional): installs `requirements.lock` so the selector can also run sqlglot's
+  tests. When a candidate set holds a very slow test and the cheap candidates covering the same
+  change are inexpensive, it runs the cheap ones first (stopping at the first failure); if all
+  pass, the slow test is left out. Otherwise everything selected statically is kept.
 - `blast/lpt.py` – longest-processing-time split, choosing the worker count (1–8) with the
   lowest `max load + 2 s × workers`.
 

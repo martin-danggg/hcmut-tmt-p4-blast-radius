@@ -31,6 +31,7 @@ DYNAMIC = os.environ.get("BR_DYNAMIC", "1") == "1"          # import checks
 HEAVY_SKIP = os.environ.get("BR_HEAVY_SKIP", "0") == "1"     # light-signal for slow tests
 BUDGET = float(os.environ.get("BR_BUDGET", "110"))          # wall seconds for dynamic work
 HEAVY_S = 3.0
+P_PASS = 0.4   # share of edits with slow candidates that break no cheap candidate (sample: 3/5)
 
 
 def log(*a):
@@ -156,10 +157,13 @@ def dynamic(plans, md, num, ms, t_start):
         if not heavy or not light:
             continue
         static_cost = best_split([(ms[n], n) for n in sel])[0] / 1000
-        light_cost = 1.6 * sum(ms[n] for n in light) / 1000 + 2.5
-        if light_cost >= static_cost - 3:
+        t_light = sum(ms[n] for n in light) / 1000
+        light_cost = 1.6 * t_light + 2.5          # CPU to run every cheap candidate (all pass)
+        fail_cost = 2.5 + 0.8 * t_light           # CPU wasted when one fails (we stop at the first)
+        gain = P_PASS * (static_cost - light_cost) - (1 - P_PASS) * fail_cost
+        if gain < 1.0:
             continue
-        jobs.append((static_cost - light_cost, plan, light, heavy))
+        jobs.append((gain, plan, light, heavy))
     jobs.sort(key=lambda j: -j[0])
     running = []
     queue = list(jobs)
