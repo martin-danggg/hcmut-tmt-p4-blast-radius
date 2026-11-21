@@ -10,12 +10,14 @@ def sid(m):
         sets[m] = len(sets)
     return sets[m]
 rt = {f: [(l, sid(m)) for l, m in sorted(d.items())] for f, d in md._rt.items()}
+imp = {f: [(l, sid(m)) for l, m in sorted(d.items())] for f, d in md._imp.items()}
 loaded = {f: sid(m) for f, m in md._loaded.items()}
 opened = {p: sid(m) for p, m in md._opened.items()}
+inst = {k: sid(m) for k, m in md._inst.items()}
 masks = [None] * len(sets)
 for m, i in sets.items():
     masks[i] = m
-blob = {"version": 1, "ids": md.ids, "masks": masks, "rt": rt, "loaded": loaded, "opened": opened,
+blob = {"version": 3, "ids": md.ids, "masks": masks, "rt": rt, "imp": imp, "loaded": loaded, "opened": opened, "inst": inst,
         "dt": {t: round(tests[t]["dt"], 4) for t in md.ids}}
 raw = pickle.dumps(blob, protocol=5)
 data = lzma.compress(raw, preset=9)

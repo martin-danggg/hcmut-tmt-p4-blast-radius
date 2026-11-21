@@ -11,6 +11,11 @@ the pinned sqlglot commit (`eb11aec`):
   Module/class-level edits select the tests that loaded the module and read the changed names.
   Fixture/data files select the tests that opened them. Syntax errors, unknown files or any
   error fall back to running every test.
+- Class-level edits are narrowed further to tests that instantiated the class (or an enclosing
+  class, or a subclass); edits inside a lambda select only the lambda's callers.
+- `blast/runner.py` – when a change runs at import time, the patched module is imported from a
+  symlink overlay of the pinned checkout under `/tmp`; if the import fails, every test that
+  loaded that module is selected.
 - `blast/lpt.py` – longest-processing-time split, choosing the worker count (1–8) with the
   lowest `max load + 2 s × workers`.
 

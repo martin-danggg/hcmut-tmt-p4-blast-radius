@@ -15,6 +15,8 @@ os.rename('/opt/sqlglot-${SQLGLOT_SHA}', '/opt/sqlglot')" \
 COPY selector.py /app/selector.py
 COPY blast /app/blast
 COPY map /app/map
-RUN python -m compileall -q /app && chmod -R a+rX /app /opt/sqlglot
+RUN python -m compileall -q /app /opt/sqlglot/sqlglot && chmod -R a+rX /app /opt/sqlglot
+
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHON_CPU_COUNT=1
 
 CMD ["python", "/app/selector.py"]
